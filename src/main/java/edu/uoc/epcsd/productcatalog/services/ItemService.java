@@ -7,9 +7,11 @@ import edu.uoc.epcsd.productcatalog.kafka.KafkaConstants;
 import edu.uoc.epcsd.productcatalog.kafka.ProductMessage;
 import edu.uoc.epcsd.productcatalog.repositories.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,11 +36,12 @@ public class ItemService {
         return itemRepository.findBySerialNumber(serialNumber);
     }
 
-    public Item setOperational(String serialNumber, @RequestBody Boolean operational) {
-
-        // TODO: complete this method:
-
-        return null;
+    public Item setOperational(String serialNumber, Boolean operational) {
+        Item item = itemRepository.findBySerialNumber(serialNumber).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found")
+        );
+        item.setStatus(operational ? ItemStatus.OPERATIONAL : ItemStatus.NON_OPERATIONAL);
+        return itemRepository.save(item);
 
     }
     public Item createItem(Long productId, String serialNumber) {

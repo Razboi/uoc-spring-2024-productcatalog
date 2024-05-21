@@ -26,10 +26,10 @@ public class ProductController {
 
     @GetMapping("/")
     @ResponseStatus(HttpStatus.OK)
-    public List<Product> getAllProducts() {
+    public List<Product> getAllProducts(@RequestParam(required = false) String name, @RequestParam(required = false) String category) {
         log.trace("getAllProducts");
 
-        return productService.findAll();
+        return productService.findAll(name, category);
     }
 
     @GetMapping("/{productId}")
@@ -61,9 +61,10 @@ public class ProductController {
         return ResponseEntity.created(uri).body(productId);
     }
 
-    // TODO: add the code for the missing system operations here:
-    // 1. remove product (use DELETE HTTP verb). Must remove the associated items
-    // 2. query products by name
-    // 3. query products by category/subcategory
-
+    @DeleteMapping("/{productId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteProduct(@PathVariable @NotNull Long productId) {
+        log.trace("deleteProduct");
+        productService.deleteProduct(productId);
+    }
 }

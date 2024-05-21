@@ -2,6 +2,7 @@ package edu.uoc.epcsd.productcatalog.services;
 
 import edu.uoc.epcsd.productcatalog.entities.Category;
 import edu.uoc.epcsd.productcatalog.entities.Product;
+import edu.uoc.epcsd.productcatalog.repositories.ItemRepository;
 import edu.uoc.epcsd.productcatalog.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,19 @@ public class ProductService {
     @Autowired
     private CategoryService categoryService;
 
-    public List<Product> findAll() {
+    @Autowired
+    private ItemRepository itemRepository;
+
+    public List<Product> findAll(String name, String category) {
+        if (name != null && category != null) {
+            return productRepository.findByNameContainingAndCategoryNameContaining(name, category);
+        }
+        if (name != null) {
+            return productRepository.findByNameContaining(name);
+        }
+        if (category != null) {
+            return productRepository.findByCategoryNameContaining(category);
+        }
         return productRepository.findAll();
     }
 
@@ -39,5 +52,13 @@ public class ProductService {
         }
 
         return productRepository.save(product);
+    }
+
+    public void deleteProduct(Long productId) {
+        Optional<Product> productToDelete = productRepository.findById(productId);
+        productToDelete.ifPresent(product -> {
+            itemRepository.deleteAll(product.getItemList());
+            productRepository.delete(product);
+        });
     }
 }

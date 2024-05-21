@@ -14,7 +14,16 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public List<Category> findAll() {
+    public List<Category> findAll(String name, String description, Long parentId) {
+        if (name != null) {
+            return categoryRepository.findByNameContaining(name);
+        }
+        if (description != null) {
+            return categoryRepository.findByDescriptionContaining(description);
+        }
+        if (parentId != null) {
+            return categoryRepository.findByParentId(parentId);
+        }
         return categoryRepository.findAll();
     }
 

@@ -23,10 +23,14 @@ public class CategoryController {
 
     @GetMapping("/")
     @ResponseStatus(HttpStatus.OK)
-    public List<Category> getAllCategories() {
+    public List<Category> getAllCategories(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) Long parentId
+    ) {
         log.trace("getAllCategories");
 
-        return categoryService.findAll();
+        return categoryService.findAll(name, description, parentId);
     }
 
     @PostMapping
