@@ -1,5 +1,6 @@
 package edu.uoc.epcsd.productcatalog.services;
 
+import edu.uoc.epcsd.productcatalog.controllers.dtos.UpdateItemRequest;
 import edu.uoc.epcsd.productcatalog.entities.Item;
 import edu.uoc.epcsd.productcatalog.entities.ItemStatus;
 import edu.uoc.epcsd.productcatalog.entities.Product;
@@ -36,13 +37,19 @@ public class ItemService {
         return itemRepository.findBySerialNumber(serialNumber);
     }
 
-    public Item setOperational(String serialNumber, Boolean operational) {
+    public Item updateItem(String serialNumber, UpdateItemRequest updateItemRequest) {
         Item item = itemRepository.findBySerialNumber(serialNumber).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found")
         );
-        item.setStatus(operational ? ItemStatus.OPERATIONAL : ItemStatus.NON_OPERATIONAL);
-        return itemRepository.save(item);
-
+        item.setStatus(updateItemRequest.getStatus());
+        Item updatedItem = itemRepository.save(item);
+        if (updateItemRequest.getStatus().equals(ItemStatus.OPERATIONAL)) {
+            productKafkaTemplate.send(
+                    KafkaConstants.PRODUCT_TOPIC + KafkaConstants.SEPARATOR + KafkaConstants.UNIT_AVAILABLE,
+                    ProductMessage.builder().productId(updatedItem.getProduct().getId()).build()
+            );
+        }
+        return updatedItem;
     }
     public Item createItem(Long productId, String serialNumber) {
 

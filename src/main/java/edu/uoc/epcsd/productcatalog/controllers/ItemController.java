@@ -2,7 +2,9 @@ package edu.uoc.epcsd.productcatalog.controllers;
 
 
 import edu.uoc.epcsd.productcatalog.controllers.dtos.CreateItemRequest;
+import edu.uoc.epcsd.productcatalog.controllers.dtos.UpdateItemRequest;
 import edu.uoc.epcsd.productcatalog.entities.Item;
+import edu.uoc.epcsd.productcatalog.entities.ItemStatus;
 import edu.uoc.epcsd.productcatalog.services.ItemService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,18 +59,9 @@ public class ItemController {
 
     @PatchMapping("/{serialNumber}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Item> setOperational(@PathVariable String serialNumber, @RequestParam Boolean operational) {
-        log.trace("setOperational");
-        //  TODO: * if the new status is OPERATIONAL, must send a UNIT_AVAILABLE message to the kafka message queue (see ItemService.createItem method)
-        Item updatedItem = itemService.setOperational(serialNumber, operational);
+    public ResponseEntity<Item> updateItem(@PathVariable String serialNumber, @RequestBody UpdateItemRequest updateItemRequest) {
+        log.trace("updateItem");
+        Item updatedItem = itemService.updateItem(serialNumber, updateItemRequest);
         return ResponseEntity.ok().body(updatedItem);
     }
-
-
-    // TODO: add the code for the missing system operations here:
-    // 1. setOperational
-    //  * use the correct HTTP verb
-    //  * must ensure the item exists
-    //  * if the new status is OPERATIONAL, must send a UNIT_AVAILABLE message to the kafka message queue (see ItemService.createItem method)
-
 }
